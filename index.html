@@ -88,8 +88,8 @@
       <!-- عمود معاينة التصميم -->
       <div class="col-lg-6 mb-4">
         <svg id="invitationSvg" viewBox="0 0 1080 1920">
-          <!-- الخلفية: تأكد من وجود ملف inv.png في المسار الصحيح -->
-          <image id="bgImage" href="inv.png" x="0" y="0" width="1080" height="1920" />
+          <!-- تغيير الخلفية لاستخدام inv.png وتضمين كلا السمتين href و xlink:href -->
+          <image id="bgImage" href="inv.png" xlink:href="inv.png" x="0" y="0" width="1080" height="1920" />
           <g id="textGroup" transform="translate(540,960)">
             <!-- نص اسم الموظف -->
             <text id="employeeNameText" text-anchor="middle" font-family="Madani Arabic Bold" font-size="70" fill="#D38054" y="440">
@@ -147,11 +147,11 @@
       Array.from(element.children).forEach(child => inlineAllComputedStyles(child));
     }
 
-    // تحويل الصور الخارجية (مثل الخلفية) إلى Data URL
+    // تعديل دالة تضمين الصور الخارجية لتتحقق من كل من href و xlink:href
     async function inlineExternalImages(svgElement) {
       const images = svgElement.querySelectorAll("image");
       for (const imageElement of images) {
-        let href = imageElement.getAttribute("href");
+        let href = imageElement.getAttribute("href") || imageElement.getAttribute("xlink:href");
         if (href && !href.startsWith("data:")) {
           try {
             const response = await fetch(href);
@@ -163,6 +163,7 @@
               reader.readAsDataURL(blob);
             });
             imageElement.setAttribute("href", dataUrl);
+            imageElement.setAttribute("xlink:href", dataUrl);
           } catch (e) {
             console.error("فشل في تحويل الصورة الخارجية:", e);
           }
