@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>توليد الدعوات المخصصة</title>
+  <title>توليد الدعوات المخصصة - معاينة متجاوبة</title>
   <!-- تضمين Bootstrap مع دعم RTL -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
   <!-- تضمين Bootstrap Icons لتحسين المظهر -->
@@ -11,7 +11,7 @@
   <!-- تضمين مكتبة jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* تضمين الخطوط (عند العرض) من ملفات TTF */
+    /* تضمين الخطوط */
     @font-face {
       font-family: 'Madani Arabic Bold';
       src: url('fonts/MadaniArabic-Bold.ttf') format('truetype');
@@ -28,20 +28,41 @@
       direction: rtl;
       background-color: #f8f9fa;
     }
-    /* إعداد عرض معاينة الدعوة */
-    svg {
-      width: 100%;
+    /* تحسين شكل البطاقات والأزرار */
+    .card {
+      border-radius: 10px;
+    }
+    .btn-custom {
+      border-radius: 25px;
+    }
+    /* إعدادات قسم معاينة التصميم */
+    /* تحديد ارتفاع البطاقة إلى 99vh (أقل بنسبة 1% من الشاشة) */
+    #previewSection .card {
+      height: 99vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* الجزء الخاص بالمعاينة يتمدد ويستخدم بقية المساحة داخل البطاقة */
+    #previewSection .card-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* إعداد الـ SVG بحيث يحتفظ بنسبة الأبعاد الأصلية ولا يتجاوز حدود الحاوية */
+    #previewSection svg {
+      max-height: 100%;
+      max-width: 100%;
       height: auto;
-      border: 1px solid #ccc;
-      margin: 20px 0;
-      display: block;
+      width: auto;
     }
   </style>
 </head>
 <body>
-  <div class="container my-4">
+  <div class="container">
     <div class="row">
-      <!-- عمود إدخال البيانات مع واجهة محسنة -->
+      <!-- عمود إدخال البيانات -->
       <div class="col-lg-6 mb-4">
         <div class="card shadow-sm border-primary">
           <div class="card-header bg-primary text-white">
@@ -49,63 +70,92 @@
           </div>
           <div class="card-body">
             <form id="invitationForm">
-              <!-- حقل اسم الموظف -->
+              <!-- حقل اسم الموظف مع توضيح بسيط -->
               <div class="mb-3">
                 <label for="employeeName" class="form-label">اسم الموظف</label>
                 <div class="input-group">
                   <span class="input-group-text"><i class="bi bi-person"></i></span>
-                  <input type="text" id="employeeName" class="form-control" placeholder="أدخل اسم الموظف">
+                  <input type="text" id="employeeName" class="form-control" placeholder="أدخل اسم الموظف" aria-describedby="employeeNameHelp">
                 </div>
+                <div id="employeeNameHelp" class="form-text">مثال: أحمد محمد</div>
               </div>
-              <!-- حقل المسمى الوظيفي -->
+              <!-- حقل المسمى الوظيفي مع توضيح -->
               <div class="mb-3">
                 <label for="jobTitle" class="form-label">المسمى الوظيفي</label>
                 <div class="input-group">
                   <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                  <input type="text" id="jobTitle" class="form-control" placeholder="أدخل المسمى الوظيفي">
+                  <input type="text" id="jobTitle" class="form-control" placeholder="أدخل المسمى الوظيفي" aria-describedby="jobTitleHelp">
                 </div>
+                <div id="jobTitleHelp" class="form-text">مثال: مدير المبيعات</div>
               </div>
-              <!-- مدخلات ضبط حجم النصوص -->
+              <!-- قسم تغيير حجم الخط -->
               <div class="row">
+                <p class="mb-1 text-center fw-bold">حجم الخط</p>
                 <div class="col mb-3">
-                  <label for="employeeFontSize" class="form-label">حجم خط اسم الموظف</label>
-                  <input type="number" id="employeeFontSize" class="form-control" placeholder="70" value="70">
+                  <p class="mb-1 text-center">اسم الموظف</p>
+                  <div class="input-group">
+                    <button type="button" class="btn btn-outline-secondary" onclick="decrementFontSize('employeeFontSize')">-</button>
+                    <input type="number" id="employeeFontSize" class="form-control text-center" value="70">
+                    <button type="button" class="btn btn-outline-secondary" onclick="incrementFontSize('employeeFontSize')">+</button>
+                  </div>
                 </div>
                 <div class="col mb-3">
-                  <label for="jobTitleFontSize" class="form-label">حجم خط المسمى الوظيفي</label>
-                  <input type="number" id="jobTitleFontSize" class="form-control" placeholder="50" value="50">
+                  <p class="mb-1 text-center">المسمى الوظيفي</p>
+                  <div class="input-group">
+                    <button type="button" class="btn btn-outline-secondary" onclick="decrementFontSize('jobTitleFontSize')">-</button>
+                    <input type="number" id="jobTitleFontSize" class="form-control text-center" value="50">
+                    <button type="button" class="btn btn-outline-secondary" onclick="incrementFontSize('jobTitleFontSize')">+</button>
+                  </div>
                 </div>
               </div>
-              <!-- الأزرار لتحميل التصميم -->
-              <div class="d-grid gap-2">
-                <button type="button" onclick="downloadImage()" class="btn btn-success">حفظ كصورة PNG</button>
-                <button type="button" onclick="downloadPDF()" class="btn btn-primary">حفظ كملف PDF</button>
+              <!-- أزرار حفظ التصميم بجانب بعض -->
+              <div class="d-flex justify-content-center gap-3">
+                <button type="button" onclick="downloadImage()" class="btn btn-success btn-custom">
+                  <i class="bi bi-download"></i> حفظ كصورة PNG
+                </button>
+                <button type="button" onclick="downloadPDF()" class="btn btn-primary btn-custom">
+                  <i class="bi bi-file-earmark-pdf"></i> حفظ كملف PDF
+                </button>
               </div>
             </form>
+            <!-- زر للهواتف لعرض المعاينة بسرعة -->
+            <div class="mt-3 d-lg-none">
+              <a href="#previewSection" class="btn btn-info btn-custom btn-block">
+                <i class="bi bi-eye"></i> عرض المعاينة
+              </a>
+            </div>
           </div>
         </div>
       </div>
+      
       <!-- عمود معاينة التصميم -->
-      <!-- تمت إضافة xmlns:xlink هنا لضمان تحميل صورة الخلفية -->
-      <div class="col-lg-6 mb-4">
-        <svg id="invitationSvg" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <!-- الخلفية باستخدام inv.png مع تضمين كل من href و xlink:href -->
-          <image id="bgImage" href="inv.png" xlink:href="inv.png" x="0" y="0" width="1080" height="1920" />
-          <g id="textGroup" transform="translate(540,960)">
-            <!-- نص اسم الموظف -->
-            <text id="employeeNameText" text-anchor="middle" font-family="Madani Arabic Bold" font-size="70" fill="#D38054" y="440">
-              اسم الموظف
-            </text>
-            <!-- نص المسمى الوظيفي -->
-            <text id="jobTitleText" text-anchor="middle" font-family="Madani Arabic Light" font-size="50" fill="#000" y="340">
-              المسمى الوظيفي
-            </text>
-          </g>
-        </svg>
+      <div class="col-lg-6 mb-4" id="previewSection">
+        <div class="card shadow-sm border-secondary">
+          <div class="card-header bg-secondary text-white">
+            <h4 class="card-title mb-0">معاينة التصميم</h4>
+          </div>
+          <div class="card-body p-0">
+            <!-- الـ SVG سيتم عرضه داخل الحاوية بحيث يحتفظ بنسبة الأبعاد الأصلية -->
+            <svg id="invitationSvg" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <!-- الخلفية باستخدام inv.png -->
+              <image id="bgImage" href="inv.png" xlink:href="inv.png" x="0" y="0" width="1080" height="1920" />
+              <g id="textGroup" transform="translate(540,960)">
+                <!-- نص اسم الموظف -->
+                <text id="employeeNameText" text-anchor="middle" font-family="Madani Arabic Bold" font-size="70" fill="#D38054" y="440">
+                  اسم الموظف
+                </text>
+                <!-- نص المسمى الوظيفي -->
+                <text id="jobTitleText" text-anchor="middle" font-family="Madani Arabic Light" font-size="50" fill="#000" y="340">
+                  المسمى الوظيفي
+                </text>
+              </g>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  
+
   <!-- تضمين Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -129,6 +179,24 @@
       document.getElementById('jobTitleText').setAttribute('font-size', jobFontSize);
     }
 
+    function incrementFontSize(fieldId) {
+      const field = document.getElementById(fieldId);
+      let value = parseInt(field.value, 10) || 0;
+      value += 5;
+      field.value = value;
+      updateFontSizes();
+    }
+
+    function decrementFontSize(fieldId) {
+      const field = document.getElementById(fieldId);
+      let value = parseInt(field.value, 10) || 0;
+      if(value > 5) {  // لا ينقص عن 5
+        value -= 5;
+        field.value = value;
+        updateFontSizes();
+      }
+    }
+
     // الحصول على اسم الملف بناءً على مدخلات المستخدم
     function getFileName() {
       const name = document.getElementById('employeeName').value.trim() || "اسم الموظف";
@@ -136,7 +204,7 @@
       return `${name} - ${job}`;
     }
 
-    // تضمين الأنماط المحسوبة لكل عنصر داخل الـ SVG
+    // دوال تضمين الأنماط والصور والخطوط (تبقى دون تغيير)
     function inlineAllComputedStyles(element) {
       const computedStyle = window.getComputedStyle(element);
       let styleString = "";
@@ -148,7 +216,6 @@
       Array.from(element.children).forEach(child => inlineAllComputedStyles(child));
     }
 
-    // تعديل دالة تضمين الصور الخارجية لتتحقق من كل من href و xlink:href
     async function inlineExternalImages(svgElement) {
       const images = svgElement.querySelectorAll("image");
       for (const imageElement of images) {
@@ -172,7 +239,6 @@
       }
     }
 
-    // دالة لتحويل ملف الخط إلى Data URL وإرجاع تعريف الـ @font-face
     async function inlineFont(fontName, fontUrl) {
       try {
         const response = await fetch(fontUrl);
@@ -190,7 +256,6 @@
       }
     }
 
-    // تضمين تعريفات الخط داخل الـ SVG باستخدام Data URLs
     async function inlineFonts(svgElement) {
       const boldCSS = await inlineFont('Madani Arabic Bold', 'fonts/MadaniArabic-Bold.ttf');
       const lightCSS = await inlineFont('Madani Arabic Light', 'fonts/MadaniArabic-Light.ttf');
@@ -200,7 +265,6 @@
       svgElement.insertBefore(styleElement, svgElement.firstChild);
     }
 
-    // تحضير نسخة من الـ SVG مع دمج الأنماط والصور والخطوط الخارجية
     async function prepareSVGClone(svgElement) {
       const clone = svgElement.cloneNode(true);
       inlineAllComputedStyles(clone);
@@ -209,13 +273,10 @@
       return clone;
     }
 
-    // حفظ التصميم كصورة PNG بنفس الأبعاد الأصلية (1080×1920)
     async function downloadImage() {
       const svg = document.getElementById("invitationSvg");
       const preparedSVG = await prepareSVGClone(svg);
-      // الانتظار حتى يتم تحميل جميع الخطوط
       await document.fonts.ready;
-      
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(preparedSVG);
       const img = new Image();
@@ -237,13 +298,10 @@
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
     }
 
-    // حفظ التصميم كملف PDF باستخدام مكتبة jsPDF
     async function downloadPDF() {
       const svg = document.getElementById("invitationSvg");
       const preparedSVG = await prepareSVGClone(svg);
-      // الانتظار حتى يتم تحميل جميع الخطوط
       await document.fonts.ready;
-      
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(preparedSVG);
       const img = new Image();
