@@ -68,7 +68,7 @@
               <!-- مدخلات ضبط حجم النصوص -->
               <div class="row">
                 <div class="col mb-3">
-                  <label for="employeeFontSize" class="form-label">حجم خط اسم المـــــــوظف</label>
+                  <label for="employeeFontSize" class="form-label">حجم خط اسم الموظف</label>
                   <input type="number" id="employeeFontSize" class="form-control" placeholder="70" value="70">
                 </div>
                 <div class="col mb-3">
@@ -86,9 +86,10 @@
         </div>
       </div>
       <!-- عمود معاينة التصميم -->
+      <!-- تمت إضافة xmlns:xlink هنا لضمان تحميل صورة الخلفية -->
       <div class="col-lg-6 mb-4">
-        <svg id="invitationSvg" viewBox="0 0 1080 1920">
-          <!-- تغيير الخلفية لاستخدام inv.png وتضمين كلا السمتين href و xlink:href -->
+        <svg id="invitationSvg" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <!-- الخلفية باستخدام inv.png مع تضمين كل من href و xlink:href -->
           <image id="bgImage" href="inv.png" xlink:href="inv.png" x="0" y="0" width="1080" height="1920" />
           <g id="textGroup" transform="translate(540,960)">
             <!-- نص اسم الموظف -->
