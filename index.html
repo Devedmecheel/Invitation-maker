@@ -7,6 +7,8 @@
   <title>توليد الدعوات المخصصة</title>
   <!-- تضمين Bootstrap مع دعم RTL -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+  <!-- تضمين مكتبة jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     /* تضمين الخطوط (عند العرض) من ملفات TTF - هذه القواعد تُستخدم أثناء العرض في المتصفح */
     @font-face {
@@ -24,7 +26,6 @@
     body {
       direction: rtl;
     }
-
     /* إعداد عرض معاينة الدعوة */
     svg {
       width: 100%;
@@ -38,7 +39,7 @@
 <body>
   <div class="container my-4">
     <div class="row">
-      <!-- العمود الذي يحتوي على حقول الإدخال والزر -->
+      <!-- العمود الذي يحتوي على حقول الإدخال والأزرار -->
       <div class="col-lg-6 mb-4">
         <h1 class="text-center mb-4">توليد الدعوات المخصصة</h1>
         <div class="card p-4">
@@ -50,24 +51,35 @@
             <label for="jobTitle" class="form-label">المسمى الوظيفي</label>
             <input type="text" id="jobTitle" class="form-control" placeholder="المسمى الوظيفي">
           </div>
+          <!-- مدخلات التحكم في حجم النصوص -->
+          <div class="mb-3">
+            <label for="employeeFontSize" class="form-label">حجم خط اسم الموظف</label>
+            <input type="number" id="employeeFontSize" class="form-control" placeholder="70" value="70">
+          </div>
+          <div class="mb-3">
+            <label for="jobTitleFontSize" class="form-label">حجم خط المسمى الوظيفي</label>
+            <input type="number" id="jobTitleFontSize" class="form-control" placeholder="50" value="50">
+          </div>
           <div class="d-grid gap-2">
             <!-- زر حفظ التصميم كصورة PNG -->
             <button onclick="downloadImage()" class="btn btn-success">حفظ كصورة PNG</button>
+            <!-- زر حفظ التصميم كملف PDF -->
+            <button onclick="downloadPDF()" class="btn btn-primary">حفظ كملف PDF</button>
           </div>
         </div>
       </div>
       <!-- العمود الذي يحتوي على معاينة التصميم -->
       <div class="col-lg-6 mb-4">
         <svg id="invitationSvg" viewBox="0 0 1080 1920">
-          <!-- الخلفية: تأكد من أن ملف inv.svg موجود في المسار الصحيح -->
+          <!-- الخلفية: تأكد من أن ملف inv-1.svg موجود في المسار الصحيح -->
           <image id="bgImage" href="inv-1.svg" x="0" y="0" width="1080" height="1920" />
           <!-- مجموعة النصوص مع خصائصها -->
           <g id="textGroup" transform="translate(540,960)">
-            <!-- نص اسم الموظف بخط Madani Arabic Bold، حجم 90، ولون #D38054 -->
+            <!-- نص اسم الموظف بخط Madani Arabic Bold -->
             <text id="employeeNameText" text-anchor="middle" font-family="Madani Arabic Bold" font-size="70" fill="#D38054" y="440">
               اسم الموظف
             </text>
-            <!-- نص المسمى الوظيفي بخط Madani Arabic Light، حجم 53، ولون أسود -->
+            <!-- نص المسمى الوظيفي بخط Madani Arabic Light -->
             <text id="jobTitleText" text-anchor="middle" font-family="Madani Arabic Light" font-size="50" fill="#000" y="340">
               المسمى الوظيفي
             </text>
@@ -80,15 +92,25 @@
   <!-- تضمين Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // تحديث المعاينة فوراً عند إدخال المستخدم
+    // تحديث المعاينة فوراً عند إدخال المستخدم للنصوص
     document.getElementById('employeeName').addEventListener('input', updateInvitation);
     document.getElementById('jobTitle').addEventListener('input', updateInvitation);
+    // تحديث حجم النصوص عند تغيير المدخلات الخاصة بالحجم
+    document.getElementById('employeeFontSize').addEventListener('input', updateFontSizes);
+    document.getElementById('jobTitleFontSize').addEventListener('input', updateFontSizes);
 
     function updateInvitation() {
       const name = document.getElementById('employeeName').value;
       const job = document.getElementById('jobTitle').value;
       document.getElementById('employeeNameText').textContent = name || "اسم الموظف";
       document.getElementById('jobTitleText').textContent = job || "المسمى الوظيفي";
+    }
+
+    function updateFontSizes() {
+      const employeeFontSize = document.getElementById('employeeFontSize').value || "70";
+      const jobFontSize = document.getElementById('jobTitleFontSize').value || "50";
+      document.getElementById('employeeNameText').setAttribute('font-size', employeeFontSize);
+      document.getElementById('jobTitleText').setAttribute('font-size', jobFontSize);
     }
 
     // الحصول على اسم الملف بناءً على مدخلات المستخدم
@@ -193,6 +215,33 @@
         document.body.removeChild(downloadLink);
       };
       // تحويل الـ SVG إلى base64 وتعيينه لمصدر الصورة
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+    }
+
+    // حفظ التصميم كملف PDF باستخدام مكتبة jsPDF
+    async function downloadPDF() {
+      const svg = document.getElementById("invitationSvg");
+      const preparedSVG = await prepareSVGClone(svg);
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(preparedSVG);
+      const img = new Image();
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext("2d");
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imgData = canvas.toDataURL("image/png");
+        // إنشاء ملف PDF بالأبعاد المناسبة
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "px",
+          format: [1080, 1920]
+        });
+        pdf.addImage(imgData, "PNG", 0, 0, 1080, 1920);
+        pdf.save(getFileName() + ".pdf");
+      };
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
     }
   </script>
