@@ -4,31 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>توليد الدعوات المخصصة</title>
-  <!-- تضمين Bootstrap مع دعم RTL -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-  <!-- تضمين Bootstrap Icons لتحسين المظهر -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-  <!-- تضمين مكتبة jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* تضمين الخطوط (عند العرض) من ملفات TTF */
     @font-face {
       font-family: 'Madani Arabic Bold';
       src: url('fonts/MadaniArabic-Bold.ttf') format('truetype');
-      font-weight: bold;
-      font-style: normal;
     }
     @font-face {
       font-family: 'Madani Arabic Light';
       src: url('fonts/MadaniArabic-Light.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
     }
     body {
       direction: rtl;
       background-color: #f8f9fa;
     }
-    /* إعداد عرض معاينة الدعوة */
     svg {
       width: 100%;
       height: auto;
@@ -41,7 +32,6 @@
 <body>
   <div class="container my-4">
     <div class="row">
-      <!-- عمود إدخال البيانات مع واجهة محسنة -->
       <div class="col-lg-6 mb-4">
         <div class="card shadow-sm border-primary">
           <div class="card-header bg-primary text-white">
@@ -49,7 +39,6 @@
           </div>
           <div class="card-body">
             <form id="invitationForm">
-              <!-- حقل اسم الموظف -->
               <div class="mb-3">
                 <label for="employeeName" class="form-label">اسم الموظف</label>
                 <div class="input-group">
@@ -57,7 +46,6 @@
                   <input type="text" id="employeeName" class="form-control" placeholder="أدخل اسم الموظف">
                 </div>
               </div>
-              <!-- حقل المسمى الوظيفي -->
               <div class="mb-3">
                 <label for="jobTitle" class="form-label">المسمى الوظيفي</label>
                 <div class="input-group">
@@ -65,18 +53,6 @@
                   <input type="text" id="jobTitle" class="form-control" placeholder="أدخل المسمى الوظيفي">
                 </div>
               </div>
-              <!-- مدخلات ضبط حجم النصوص -->
-              <div class="row">
-                <div class="col mb-3">
-                  <label for="employeeFontSize" class="form-label">حجم خط اسم الموظف</label>
-                  <input type="number" id="employeeFontSize" class="form-control" placeholder="70" value="70">
-                </div>
-                <div class="col mb-3">
-                  <label for="jobTitleFontSize" class="form-label">حجم خط المسمى الوظيفي</label>
-                  <input type="number" id="jobTitleFontSize" class="form-control" placeholder="50" value="50">
-                </div>
-              </div>
-              <!-- الأزرار لتحميل التصميم -->
               <div class="d-grid gap-2">
                 <button type="button" onclick="downloadImage()" class="btn btn-success">حفظ كصورة PNG</button>
                 <button type="button" onclick="downloadPDF()" class="btn btn-primary">حفظ كملف PDF</button>
@@ -85,17 +61,13 @@
           </div>
         </div>
       </div>
-      <!-- عمود معاينة التصميم -->
       <div class="col-lg-6 mb-4">
         <svg id="invitationSvg" viewBox="0 0 1080 1920">
-          <!-- الخلفية: تأكد من وجود ملف inv-1.svg في المسار الصحيح -->
           <image id="bgImage" href="inv-1.svg" x="0" y="0" width="1080" height="1920" />
           <g id="textGroup" transform="translate(540,960)">
-            <!-- نص اسم الموظف -->
             <text id="employeeNameText" text-anchor="middle" font-family="Madani Arabic Bold" font-size="70" fill="#D38054" y="440">
               اسم الموظف
             </text>
-            <!-- نص المسمى الوظيفي -->
             <text id="jobTitleText" text-anchor="middle" font-family="Madani Arabic Light" font-size="50" fill="#000" y="340">
               المسمى الوظيفي
             </text>
@@ -104,159 +76,55 @@
       </div>
     </div>
   </div>
-  
-  <!-- تضمين Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // تحديث المعاينة فوراً عند إدخال المستخدم للنصوص وحجم الخطوط
     document.getElementById('employeeName').addEventListener('input', updateInvitation);
     document.getElementById('jobTitle').addEventListener('input', updateInvitation);
-    document.getElementById('employeeFontSize').addEventListener('input', updateFontSizes);
-    document.getElementById('jobTitleFontSize').addEventListener('input', updateFontSizes);
 
     function updateInvitation() {
-      const name = document.getElementById('employeeName').value;
-      const job = document.getElementById('jobTitle').value;
-      document.getElementById('employeeNameText').textContent = name || "اسم الموظف";
-      document.getElementById('jobTitleText').textContent = job || "المسمى الوظيفي";
+      document.getElementById('employeeNameText').textContent = document.getElementById('employeeName').value || "اسم الموظف";
+      document.getElementById('jobTitleText').textContent = document.getElementById('jobTitle').value || "المسمى الوظيفي";
     }
 
-    function updateFontSizes() {
-      const employeeFontSize = document.getElementById('employeeFontSize').value || "70";
-      const jobFontSize = document.getElementById('jobTitleFontSize').value || "50";
-      document.getElementById('employeeNameText').setAttribute('font-size', employeeFontSize);
-      document.getElementById('jobTitleText').setAttribute('font-size', jobFontSize);
+    async function convertSvgToCanvas() {
+      const svg = document.getElementById("invitationSvg");
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svg);
+      const img = new Image();
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext("2d");
+      return new Promise(resolve => {
+        img.onload = function () {
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas);
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+      });
     }
 
-    // الحصول على اسم الملف بناءً على مدخلات المستخدم
-    function getFileName() {
-      const name = document.getElementById('employeeName').value.trim() || "اسم الموظف";
-      const job = document.getElementById('jobTitle').value.trim() || "المسمى الوظيفي";
-      return `${name} - ${job}`;
-    }
-
-    
-    // تضمين الأنماط المحسوبة لكل عنصر داخل الـ SVG
-    function inlineAllComputedStyles(element) {
-      const computedStyle = window.getComputedStyle(element);
-      let styleString = "";
-      for (let i = 0; i < computedStyle.length; i++) {
-        const prop = computedStyle[i];
-        styleString += `${prop}:${computedStyle.getPropertyValue(prop)};`;
-      }
-      element.setAttribute("style", styleString);
-      Array.from(element.children).forEach(child => inlineAllComputedStyles(child));
-    }
-
-    // تحويل الصور الخارجية (مثل الخلفية) إلى Data URL
-    async function inlineExternalImages(svgElement) {
-      const images = svgElement.querySelectorAll("image");
-      for (const imageElement of images) {
-        let href = imageElement.getAttribute("href");
-        if (href && !href.startsWith("data:")) {
-          try {
-            const response = await fetch(href);
-            const blob = await response.blob();
-            const dataUrl = await new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-            imageElement.setAttribute("href", dataUrl);
-          } catch (e) {
-            console.error("فشل في تحويل الصورة الخارجية:", e);
-          }
-        }
-      }
-    }
-
-    // دالة لتحويل ملف الخط إلى Data URL وإرجاع تعريف الـ @font-face
-    async function inlineFont(fontName, fontUrl) {
-      try {
-        const response = await fetch(fontUrl);
-        const blob = await response.blob();
-        const dataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        return `@font-face { font-family: '${fontName}'; src: url('${dataUrl}') format('truetype'); }`;
-      } catch (error) {
-        console.error("خطأ في جلب الخط:", error);
-        return "";
-      }
-    }
-
-    // تضمين تعريفات الخط داخل الـ SVG باستخدام Data URLs
-    async function inlineFonts(svgElement) {
-      const boldCSS = await inlineFont('Madani Arabic Bold', 'fonts/MadaniArabic-Bold.ttf');
-      const lightCSS = await inlineFont('Madani Arabic Light', 'fonts/MadaniArabic-Light.ttf');
-      const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
-      styleElement.setAttribute("type", "text/css");
-      styleElement.innerHTML = boldCSS + lightCSS;
-      svgElement.insertBefore(styleElement, svgElement.firstChild);
-    }
-
-    // تحضير نسخة من الـ SVG مع دمج الأنماط والصور والخطوط الخارجية
-    async function prepareSVGClone(svgElement) {
-      const clone = svgElement.cloneNode(true);
-      inlineAllComputedStyles(clone);
-      await inlineExternalImages(clone);
-      await inlineFonts(clone);
-      return clone;
-    }
-
-    // حفظ التصميم كصورة PNG بنفس الأبعاد الأصلية (1080×1920)
     async function downloadImage() {
-      const svg = document.getElementById("invitationSvg");
-      const preparedSVG = await prepareSVGClone(svg);
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(preparedSVG);
-      const img = new Image();
-      const canvas = document.createElement("canvas");
-      canvas.width = 1080;
-      canvas.height = 1920;
-      const ctx = canvas.getContext("2d");
-      img.onload = function() {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const pngData = canvas.toDataURL("image/png");
-        const fileName = getFileName() + ".png";
-        const downloadLink = document.createElement("a");
-        downloadLink.href = pngData;
-        downloadLink.download = fileName;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-      };
-      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+      const canvas = await convertSvgToCanvas();
+      canvas.toBlob(blob => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "دعوة.png";
+        link.click();
+      }, "image/png");
     }
 
-    // حفظ التصميم كملف PDF باستخدام مكتبة jsPDF
     async function downloadPDF() {
-      const svg = document.getElementById("invitationSvg");
-      const preparedSVG = await prepareSVGClone(svg);
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(preparedSVG);
-      const img = new Image();
-      const canvas = document.createElement("canvas");
-      canvas.width = 1080;
-      canvas.height = 1920;
-      const ctx = canvas.getContext("2d");
-      img.onload = function() {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const imgData = canvas.toDataURL("image/png");
+      const canvas = await convertSvgToCanvas();
+      canvas.toBlob(blob => {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-          orientation: "portrait",
-          unit: "px",
-          format: [1080, 1920]
-        });
-        pdf.addImage(imgData, "PNG", 0, 0, 1080, 1920);
-        pdf.save(getFileName() + ".pdf");
-      };
-      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+        const pdf = new jsPDF({ format: [1080, 1920] });
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          pdf.addImage(reader.result, "PNG", 0, 0, 1080, 1920);
+          pdf.save("دعوة.pdf");
+        };
+        reader.readAsDataURL(blob);
+      }, "image/png");
     }
   </script>
 </body>
